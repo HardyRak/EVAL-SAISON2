@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <title>Question Form</title>
+
+    <link rel="stylesheet" href="plugins/bootstrap/css/bootstrap.css" >
+    
+    <link rel="stylesheet" href="plugins/fontawesome-free/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="dist/css/style.css">
+    
+  </head>
+  <body>
+    
+    <div class="allWrapper">
+        <header class="header" id="header">
+
+        </header>
+
+        <section class="quiz_section" id="quizeSection">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card" style="margin-top: 15px;">
+                            <div class="card-header">
+                                <div class="quiz_card_title">
+                                    <h3 th:text="${etape.nom}"></h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <form action="/valideJoueur" method="POST">
+                                    <input type="hidden" name="id_etape" th:value="${etape.id_etape}">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="quiz_content_area">    
+                                                <div class="row">
+                                                    <div class="col-md-4" th:each="coureur : ${coureurs}">
+                                                        <div class="quiz_card_area">
+                                                            <input class="quiz_checkbox" type="checkbox" id="2" th:value="${coureur.id_coureur}" name="coureur">
+                                                            <div class="single_quiz_card">
+                                                                <div class="quiz_card_content">
+                                                                    <div class="quiz_card_icon">
+                                                                        <div class="quiz_icon quiz_icon2"></div>
+                                                                    </div>
+                                                                    <div class="quiz_card_title">
+                                                                            <h3 th:text="${coureur.nom}"><i class="fa fa-check" aria-hidden="true"></i></h3>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="submit" class="btn btn-block btn-info" value="Validé">
+                                    </div>
+        
+                                    <div class="card-body" th:if="${param.msg}">
+                                        <div class="alert alert-danger alert-dismissible">
+                                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                          <h6><i class="icon fas fa-ban"></i> Alert!</h6>
+                                          <g th:text="${param.msg}"></g>
+                                        </div>
+                                    </div>
+                                    <div class="card-body" th:if="${param.scc}">
+                                        <div class="alert alert-success alert-dismissible">
+                                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                            <h6><i class="icon fas fa-ban"></i> Réussi!</h6>
+                                            <g th:text="${param.scc}"></g>
+                                        </div>
+                                    </div>                                    
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12" style="margin-top: 15px;">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="quiz_card_title">
+                                    <h3>Deja dans l'étape</h3>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="btn-group" style="margin-bottom: 15px;">
+                                    <button type="button" class="btn btn-info" onclick="exportAPItoPDF()">PDF</button>
+                                </div>
+                                
+                                <table id="data" class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                      <th>Nom
+                                      </th>
+                                      <th>Dossard
+                                      </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody">
+                                        <tr th:each="resultat :${coureurAffect}" >
+                                            <td th:text="${resultat.coureur.nom}"></td>
+                                            <td th:text="${resultat.coureur.dossard}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>  
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+    </div>
+
+    <script src="plugins/jquery/jquery.slim.js"></script>
+    <script src="plugins/popper/umd/popper.min.js" ></script>
+    <script src="plugins//bootstrap/js/bootstrap.min.js"></script>
+  </body>
+</html>

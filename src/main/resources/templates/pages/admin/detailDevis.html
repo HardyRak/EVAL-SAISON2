@@ -1,0 +1,166 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>devis</title>
+    <link rel="stylesheet" href="../plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="../plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+    <link rel="stylesheet" href="../plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <link rel="stylesheet" href="../plugins/jqvmap/jqvmap.min.css">
+    <link rel="stylesheet" href="../dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+    <link rel="stylesheet" href="../plugins/daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" href="../plugins/summernote/summernote-bs4.min.css">
+    <link rel="stylesheet" href="../plugins/map/leaflet.css">
+</head>
+<body>
+    <div class="card-body">
+        <div class="btn-group" style="margin-bottom: 15px;margin-top: 15px;">
+            <button type="button" class="btn btn-info" onclick="topdfall('alldata')">Export devis</button>
+        </div>
+    </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card" id="alldata">
+                <div class="card-header">
+                    <p></p>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Designation</th>
+                                <th>Quantites</th>
+                                <th>Unite</th>  
+                                <th>Prix unitaire</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody">
+                            <tr>
+                                <td>000</td>
+                                <td>Lorem ipsum, dolor sit amet consectetur adipisicing elit.</td>
+                                <td>12.3</td>
+                                <td>m</td>
+                                <td>25</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="btn-group" style="margin-top: 15px;">
+                        <!-- <button type="button" class="btn btn-info" th:attr="onclick='topdf(\'' + ${trav.intitule} + '\')'">PDF</button> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card" >
+                <div class="card-header">
+                    <div class="col-sm-6">
+                        <h5>Emplacement</h5>
+                    </div>
+                </div>
+                <div class="card-body" id="map" style="height: 400px;">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- <div id="alldata" style="display: none;">
+    <p>Numero:034034034</p>
+    <p>Date:.......</p>
+    <p>Date de realisation:.......</p>
+    <table class="table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Code</th>
+                <th>Designation</th>
+                <th>Quantites</th>
+                <th>Unite</th>
+                <th>Prix unitaire</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody th:each="trav : ${travaux}">
+            <tr>
+                <td th:text="${trav.code}"></td>
+                <td th:text="${trav.intitule}"></td>
+            </tr>
+            <tr th:each="prest : ${trav.histo_prestations}">
+                <td th:text="${prest.code}"></td>
+                <td th:text="${prest.designation}"></td>
+                <td th:text="${prest.quantite}"></td>
+                <td th:text="${prest.unite.unite}"></td>
+                <td th:text="${prest.prix_unitaire}"></td>
+                <td th:text="${prest.getPrix()}"></td>
+            </tr>
+            <tr>
+                <td colspan="5" class="text-right">Total</td>
+                <td th:text="${trav.getPrixTotal()}"></td>
+            </tr>
+            <tr>
+                <td colspan="5" class="text-right">Total construction</td>
+                <td th:text="${trav.getPrixTotal()}"></td>
+            </tr>
+        </tbody>
+    </table>
+</div> -->
+</body>
+<script type="text/javascript" src="../plugins/pdf/jspdf.umd.js"></script>
+<script type="text/javascript" src="../plugins/pdf/basic.js"></script>
+<script type="text/javascript" src="../plugins/pdf/jspdf.plugin.autotable.min.js"></script>
+<script type="text/javascript" src="../plugins/xlsx/xlsx.full.min.js"></script>
+<script type="text/javascript" src="../plugins/pdf/html2pdf.bundle.min.js"></script>
+<script type="text/javascript" src="../plugins/map/leaflet.js"></script>
+<script type="text/javascript" src="../plugins/jquery/jquery.min.js"></script>
+<script>
+    function topdf(iddata) {
+      const element = document.getElementById(iddata);
+      const options = {
+          filename: iddata+'.pdf',
+          margin: 0,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { 
+            unit: 'in', 
+            format: 'letter', 
+            orientation: 'portrait' 
+          }
+        };
+        html2pdf().set(options).from(element).save();
+    }
+
+    function topdfall(iddata) {
+      const element = document.getElementById(iddata);
+      element.style.display='';
+      const options = {
+          filename: iddata+'.pdf',
+          margin: 0,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { 
+            unit: 'in', 
+            format: 'letter', 
+            orientation: 'portrait' 
+          }
+        };
+        html2pdf().set(options).from(element).save();
+    }
+
+</script>
+<script>
+    var map = L.map('map').setView([48.8566, 2.3522], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var marker = L.marker([48.8566, 2.3522]).addTo(map)
+        .bindPopup('Bonjour!<br>Je suis un marqueur à Paris.')
+        .openPopup();
+</script>

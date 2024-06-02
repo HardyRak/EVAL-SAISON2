@@ -1,0 +1,128 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajout client</title>
+    <link rel="stylesheet" href="../plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../plugins/bootstrap/css/bootstrap.css">
+
+</head>
+<body>
+    <form enctype="multipart/form-data" id="form">
+        <div class="card" style="margin-top: 15px;">
+            <div class="card-header">
+                <label for="exampleInputFile">CSV</label>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" accept=".csv" id="exampleInputFile" name="csv1">
+                            <label class="custom-file-label" for="exampleInputFile">Travaux et Maison</label>
+                        </div>
+                        <div class="input-group-append">
+                            <span class="input-group-text">Upload</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" accept=".csv" id="exampleInputFile" name="csv2">
+                            <label class="custom-file-label" for="exampleInputFile">Devis</label>
+                        </div>
+                        <div class="input-group-append">
+                            <span class="input-group-text">Upload</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </div>
+        </div>
+        <div class="card" style="margin-top: 15px;">
+            <div class="card-header">
+                <label>Resultat</label>
+            </div>
+            <div class="card-body">
+                <div class="progress" style="display: none;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+                </div>
+                <div class="alert alert-success alert-dismissible" style="display: none;">
+                    <h5><i class="icon fas fa-check"></i> Success!</h5>
+                    <span class="message"></span>
+                </div>
+                <div class="alert alert-danger alert-dismissible" style="display: none;">
+                    <h5><i class="icon fas fa-ban"></i> Error!</h5>
+                    <span class="message"></span>
+                </div>
+            </div>
+            <div class="card-footer">
+
+            </div>
+        </div>
+    </form>
+    <script src="../plugins/jquery/jquery.min.js"></script>
+    <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+    <script src="../dist/js/adminlte.min.js"></script>
+    <script src="../dist/js/demo.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#form').submit(function(event) {
+                event.preventDefault();
+
+                var formData = new FormData(this);
+
+                $('.progress').show();
+                $('.progress-bar').css('width', '0%');
+                $('.alert.alert-success').hide();
+                $('.alert.alert-danger').hide();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/import/csv',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    xhr: function() {
+                        var xhr = new window.XMLHttpRequest();
+                        xhr.upload.addEventListener('progress', function(e) {
+                            if (e.lengthComputable) {
+                                var percent = Math.round((e.loaded / e.total) * 100);
+                                $('.progress-bar').css('width', percent + '%');
+                            }
+                        });
+                        return xhr;
+                    },
+                    success: function(response) {
+                        console.log(response.message);
+                        $('.alert.alert-success .message').text(response.message);
+                        $('.alert.alert-success').show();
+                        $('.progress').hide();
+                    },
+                    error: function(xhr, status, error) {
+                        var errorMessage = "An error occurred";
+                        errorMessage = xhr.responseJSON.errors;
+                        var mss = "";
+                        for (let i = 0; i < errorMessage.length; i++) {
+                            mss += errorMessage[i] + "<br>";
+                        }
+                        console.log(mss);
+                        $('.alert.alert-danger .message').html(mss);
+                        $('.alert.alert-danger').show();
+                        $('.progress').hide();
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function() {
+            bsCustomFileInput.init();
+        });
+    </script>
+</body>
+</html>

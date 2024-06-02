@@ -1,0 +1,282 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>demande</title>
+    <link rel="stylesheet" href="../../plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../../https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="../../plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+    <link rel="stylesheet" href="../../plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <link rel="stylesheet" href="../../plugins/jqvmap/jqvmap.min.css">
+    <link rel="stylesheet" href="../../dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+    <link rel="stylesheet" href="../../plugins/daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" href="../../plugins/summernote/summernote-bs4.min.css">
+    <link rel="stylesheet" href="../../plugins/bootstrap/css/bootstrap.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12" style="margin-top: 15px;" th:each="etape :${etapes}">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title" th:text="${etape.nom}">Demande</h3>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" style="margin-bottom: 15px;">
+                        <button type="button" class="btn btn-info" onclick="exportAPItoPDF()">PDF</button>
+                    </div>
+                    
+                    <table id="data" class="table table-bordered">
+                        <thead>
+                            <tr>
+                           <th>Nom
+                           </th>
+                           <th>Dossard
+                           </th>
+                           <th>Temps
+                          </th>
+                           <th>temps d'arrivé
+                          </th>
+                          <th>Equipe
+                          </th>
+                           <th>Point
+                            </tr>
+                        </thead>
+                        <tbody id="tbody">
+                            <tr th:each="resultat :${etape.resultats}" >
+                                <td th:text="${resultat.coureur.nom}"></td>
+                                <td th:text="${resultat.coureur.dossard}"></td>
+                                <td th:text="${resultat.temps}"></td>
+                                <td th:text="${resultat.tempsArrive}"></td>
+                                <td th:text="${resultat.equipe.authentification}"></td>
+                                <td th:text="${resultat.point}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>        
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="../../plugins/pdf/jspdf.umd.js"></script>
+<script type="text/javascript" src="../../plugins/pdf/basic.js"></script>
+<script type="text/javascript" src="../../plugins/pdf/jspdf.plugin.autotable.min.js"></script>
+<script type="text/javascript" src="../../plugins/xlsx/xlsx.full.min.js"></script>
+<script type="text/javascript" src="../../plugins/pdf/html2pdf.bundle.min.js"></script>
+<script type="text/javascript" src="../../plugins/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../../plugins/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="../../plugins/bootstrap/js/bootstrap.js"></script>
+
+<script>
+function exportAPItoPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    var apiUrl = 'http://localhost:8080/api/demande';
+    fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+        if (data && data.length > 0) {
+        var tableData = [];
+
+        var headers = Object.keys(data[0]);
+        tableData.push(headers);
+
+        data.forEach(item => {
+            var rowData = [];
+            headers.forEach(header => {
+            rowData.push(item[header]);
+            });
+            tableData.push(rowData);
+        });
+        doc.text('Liste des demandes', 10, 10);
+        doc.autoTable({
+            head: [headers],
+            body: tableData.slice(1),
+            startY: 20
+        });
+
+        doc.save('demande.pdf');
+        } else {
+        console.log('Aucune donnée disponible.');
+        }
+    })
+    .catch(error => {
+        console.log('Erreur lors de la récupération des données de l\'API:', error);
+    });
+}
+</script>
+<script>
+  function exportAPItoXLSX() {
+    var apiUrl = 'http://localhost:8080/api/demande';
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          var workbook = XLSX.utils.book_new();
+          var worksheet = XLSX.utils.json_to_sheet(data);
+
+          XLSX.utils.book_append_sheet(workbook, worksheet, 'Données API');
+          var excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+          var blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          var fileName = 'demande.xlsx';
+
+          var downloadLink = document.createElement('a');
+          downloadLink.href = URL.createObjectURL(blob);
+          downloadLink.download = fileName;
+          downloadLink.click();
+        } else {
+          console.log('Aucune donnée disponible.');
+        }
+      })
+      .catch(error => {
+        console.log('Erreur lors de la récupération des données de l\'API:', error);
+      });
+  }
+</script>
+<script>
+    function exportAPItoCSV() {
+      var apiUrl = 'http://localhost:8080/api/demande';
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.length > 0) {
+            var csvContent = "data:text/csv;charset=utf-8,";
+            
+            var headers = Object.keys(data[0]);
+            csvContent += headers.join(",") + "\n";
+            
+            data.forEach(item => {
+              var rowData = headers.map(header => item[header]);
+              csvContent += rowData.join(",") + "\n";
+            });
+            
+            var encodedUri = encodeURI(csvContent);
+            var downloadLink = document.createElement('a');
+            downloadLink.href = encodedUri;
+            downloadLink.download = 'demande.csv';
+            downloadLink.click();
+          } else {
+            console.log('Aucune donnée disponible.');
+          }
+        })
+        .catch(error => {
+          console.log('Erreur lors de la récupération des données de l\'API:', error);
+        });
+    }
+
+    const input = document.getElementById('search');
+    const tbody = document.getElementById('tbody');
+    const tdata = document.getElementById('data');
+
+    input.addEventListener('input', function(event) {
+      const enteredText = event.target.value;
+      
+      if (enteredText === "") {
+        tbody.style.display = '';
+        removeTableBody();
+      } else {
+        tbody.style.display = 'none';
+        removeTableBody();
+        sendAjaxRequest(enteredText);
+      }
+    });
+
+    function removeTableBody() {
+      var ntbody = document.getElementById('ntbody');
+      if (ntbody) {
+        ntbody.remove();
+      }
+    }
+
+    function sendAjaxRequest(searchText) {
+      $.ajax({
+        url: '/demande/search/multiword',
+        type: 'GET',
+        data: { sentence: searchText },
+        dataType: 'json',
+        success: function(data) {
+          console.log(data);
+          var ntbody = document.createElement('tbody');
+          ntbody.id = 'ntbody';
+          ntbody.remove();
+          for (var i = 0; i < data.length; i++) {
+            var item = data[i];
+            var tr = document.createElement('tr');
+
+            var td1 = document.createElement('td');
+            td1.textContent = item.id_demande;
+            tr.appendChild(td1);
+
+            var td2 = document.createElement('td');
+            td2.textContent = item.nom;
+            tr.appendChild(td2);
+
+            var td3 = document.createElement('td');
+            td3.textContent = item.prenom;
+            tr.appendChild(td3);
+
+            var td4 = document.createElement('td');
+            td4.textContent = item.adresse;
+            tr.appendChild(td4);
+
+            var td5 = document.createElement('td');
+            td5.textContent = item.image;
+            tr.appendChild(td5);
+
+            var td6 = document.createElement('td');
+            var form = document.createElement('form');
+            form.action = '/demande/delete?id_demande=' + item.id_demande;
+            form.method = 'post';
+            var button = document.createElement('button');
+            button.type = 'submit';
+            button.className = 'btn btn-block btn-danger';
+            button.innerHTML = '<i class="fas fa-trash"></i>';
+            form.appendChild(button);
+            td6.appendChild(form);
+            tr.appendChild(td6);
+
+            var td7 = document.createElement('td');
+            var link = document.createElement('a');
+            link.href = '/demande/miseajour?id_demande=' + item.id_demande;
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn btn-block btn-info';
+            button.innerHTML = '<i class="fas fa-edit"></i>';
+            link.appendChild(button);
+            td7.appendChild(link);
+            tr.appendChild(td7);
+
+            ntbody.appendChild(tr);
+            tdata.appendChild(ntbody);
+          }
+
+        },
+        error: function(xhr, status, error) {
+          console.error('Erreur lors de l\'envoi de la requête :', error);
+        }
+      });
+  }
+
+
+  function topdf() {
+    const element = document.getElementById('data');
+      const options = {
+        filename: 'GFG.pdf',
+        margin: 0,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'letter', 
+          orientation: 'portrait' 
+        }
+      };
+      html2pdf().set(options).from(element).save();
+  }
+  </script>
+</body>
+</html>

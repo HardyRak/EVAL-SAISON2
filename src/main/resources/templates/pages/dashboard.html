@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdminLTE 3 | ChartJS</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link rel="stylesheet" href="../../plugins/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="../../dist/css/adminlte.min.css">
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="content-wrapper">
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>ChartJS</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">ChartJS</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="content">
+      <div class="row">
+        <div class="card col-md-4">
+          <div class="card-header">
+            <h5>Montant</h5>
+          </div>
+          <div class="card-body">
+
+            <div class="small-box bg-danger">
+              <div class="inner">
+                <h3>Tableau de board</h3>
+              </div>
+            </div>
+            <div class="small-box bg-info">
+              <div class="inner">
+              </div>
+              <div class="icon">
+                <i class="ion ion-bag"></i>
+              </div>
+              <a href="#" class="small-box-footer">Total montants devis</i></a>
+            </div>
+            <div class="small-box bg-info">
+              <div class="inner">
+              </div>
+              <div class="icon">
+                <i class="ion ion-bag"></i>
+              </div>
+              <a href="#" class="small-box-footer">Total montant paiement</i></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card card-success">
+            <div class="card-header">
+              <h3 class="card-title">Bar Chart</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-tool" data-card-widget="remove">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <select class="form-control col-md-4" id="select">
+                <option onclick="changeYear()">2023</option>
+                <option onclick="changeYear()">2024</option>
+                <option onclick="changeYear()">2025</option>
+              </select>
+              <div class="chart">
+                <canvas id="barChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <aside class="control-sidebar control-sidebar-dark">
+  </aside>
+</div>
+
+<script src="../../plugins/jquery/jquery.min.js"></script>
+<script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../../plugins/chart.js/Chart.min.js"></script>
+<script src="../../dist/js/adminlte.min.js"></script>
+<script src="../../dist/js/demo.js"></script>
+<script>
+
+    function getDataAjax(urlAPI) {
+      return new Promise(function(resolve, reject) {
+          $.ajax({
+            url: urlAPI,
+            method: 'GET',
+            success: function(response) {
+              resolve(response);
+            },
+            error: function(error) {
+              reject(error);
+            }
+          });
+        });
+      }
+    getDataAjax("votre url")
+    .then(function(data) {
+      var ctx=document.getElementById("barChart").getContext('2d');
+      var datas=[];
+      for (let i = 1; i <= 12; i++) {
+        let key = i.toString();
+        datas.push(data[key] || "0.0");
+      }
+      var mychart=new Chart(ctx,{
+        type:'bar',
+        data:{
+          labels:['jan','feb','mar','avr','mais','jun','jul','aou','sep','oct','nov','dec'],
+          datasets:[{
+            label:'montant',
+            data:datas,
+            backgroundColor:'blue',
+            borderWidth:1
+          }]
+        },
+        options:{
+          scales:{
+            y:{
+              beginAtZero:true
+            }
+          }
+        }
+      })
+    })
+
+    function changeYear() {
+        var select=document.getElementById("select");
+        var selected=select.value;
+        getDataAjax("/demande/montant/mois?annee="+selected)
+      .then(function(data) {
+        var ctx=document.getElementById("barChart").getContext('2d');
+        var datas=[];
+        for (let i = 1; i <= 12; i++) {
+          let key = i.toString();
+          datas.push(data[key] || "0.0");
+        }
+        var mychart=new Chart(ctx,{
+          type:'bar',
+          data:{
+            labels:['jan','feb','mar','avr','mais','jun','jul','aou','sep','oct','nov','dec'],
+            datasets:[{
+              label:'montant',
+              data:datas,
+              backgroundColor:'blue',
+              borderWidth:1
+            }]
+          },
+          options:{
+            scales:{
+              y:{
+                beginAtZero:true
+              }
+            }
+          }
+        })
+      })
+    }
+
+</script>
+</body>
+</html>

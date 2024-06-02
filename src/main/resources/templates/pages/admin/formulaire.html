@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajout demande</title>
+    <link rel="stylesheet" href="../plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../dist/css/adminlte.min.css">
+    <style>
+      .selected-card {
+        border: 2px solid blue;
+      }
+    </style>
+</head>
+<body>
+    <div class="card card-primary">
+        <div class="card-header">
+          <h3 class="card-title">Ajout demande</h3>
+        </div>
+        <form method="POST" action="../demande/validation">
+          <div class="card-body">
+            <div class="form-group">
+              <label for="date_realisation">Date de realisation</label>
+              <input type="date" class="form-control" id="date_realisation" placeholder="date_realisation" name="date_realisation">
+            </div>
+
+            <div class="form-group">
+              <label for="date_realisation">Text</label>
+              <input type="text" class="form-control" id="date_realisation" placeholder="date_realisation" name="date_realisation">
+            </div>
+
+            <div class="form-group">
+              <label for="exampleInputFile">CSV</label>
+              <div class="input-group">
+                <div class="custom-file">
+                      <input type="file" class="custom-file-input" accept=".csv" id="exampleInputFile" name="csv1">
+                      <label class="custom-file-label" for="exampleInputFile">CSV IMPORT</label>
+                  </div>
+                  <div class="input-group-append">
+                      <span class="input-group-text">Upload</span>
+                  </div>
+              </div>
+              <div class="form-group">
+                <label for="id_type">Type</label>
+                <div class="card-list">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="card">
+                                <img class="card-img-top img-fluid" th:src="@{/path/to/image}">
+                                <div class="card-body">
+                                    <p><b>450000</b></p>
+                                    <input type="radio" name="id_type" th:id="id_type" th:value="Radio" class="form-check-input">
+                                    <label class="form-check-label" style="margin-left: 10px;"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>          
+          <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Ajouté</button>
+          </div>
+        </form>
+      </div>
+</body>
+<script src="../plugins/jquery/jquery.min.js"></script>
+<script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+<script src="../dist/js/adminlte.min.js"></script>
+<script src="../dist/js/demo.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var idTypeRadios = document.querySelectorAll('input[name="id_type"]');
+  var idFinitionRadios = document.querySelectorAll('input[name="id_finition"]');
+
+  idTypeRadios.forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      idTypeRadios.forEach(function(r) {
+        if (r !== radio) {
+          r.checked = false;
+          r.parentNode.parentNode.classList.remove('selected-card');
+        }
+      });
+      radio.parentNode.parentNode.classList.add('selected-card');
+    });
+  });
+
+  idFinitionRadios.forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      idFinitionRadios.forEach(function(r) {
+        if (r !== radio) {
+          r.checked = false;
+          r.parentNode.parentNode.classList.remove('selected-card');
+        }
+      });
+      radio.parentNode.parentNode.classList.add('selected-card');
+    });
+  });
+});
+</script>
+</html>

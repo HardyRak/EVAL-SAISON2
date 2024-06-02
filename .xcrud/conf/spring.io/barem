@@ -1,0 +1,10 @@
+miniscule=>$minus$
+majuscule=>$majus$
+ajout setter=>$addsetter$
+ajout setter avec id=>$addsetterID$
+ajout requestparametre=>$addParamete$
+ajout requestparametre id seulement=>$addParameteID$
+ajout id du table=$addID$
+ajout tous les requete parametre sans id=>$addParameteNONEID$
+parseur des type valeur String en type d'attribut=>$parserJava$
+$searchColumns$=colonne pour recherche multitext
