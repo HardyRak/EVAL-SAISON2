@@ -18,7 +18,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -379,10 +381,30 @@ public class Function {
         return new java.sql.Date(newDate.getTime());
     }
 
-    public static ZonedDateTime stringToZoneDateTime(String dateTime){
-        DateTimeFormatter formatterWithoutZone = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        LocalDateTime ldt = LocalDateTime.parse(dateTime, formatterWithoutZone);
-        ZonedDateTime zdt = ZonedDateTime.of(ldt, ZoneId.systemDefault());
+    public static ZonedDateTime stringToZoneDateTime(String dateTime) {
+        List<DateTimeFormatter> formatters = Arrays.asList(
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"),
+            DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
+            DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"),
+            DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"),
+            DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")
+        );
+    
+        ZonedDateTime zdt = null;
+        for (DateTimeFormatter formatter : formatters) {
+            try {
+                LocalDateTime ldt = LocalDateTime.parse(dateTime, formatter);
+                zdt = ZonedDateTime.of(ldt, ZoneId.systemDefault());
+                break;
+            } catch (DateTimeParseException e) {
+            }
+        }
+        if (zdt == null) {
+            throw new IllegalArgumentException("Invalid date and time format: " + dateTime);
+        }
         return zdt;
     }
 
