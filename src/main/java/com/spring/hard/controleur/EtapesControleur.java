@@ -68,7 +68,7 @@ public class EtapesControleur {
 
     @GetMapping("/etapeEquipe")
     public String listeEtapeEquipe(Model model){
-        Course cours=courseService.getById((long)1).get();
+        Course cours=courseService.getById((long)2).get();
         model.addAttribute("etapes", cours.getEtapes());
         return Index.redirectLogin(session.getAttribute("user"), "user", "pages/client/etapeListe");
     }
@@ -81,6 +81,17 @@ public class EtapesControleur {
         model.addAttribute("etape",etapes);
         model.addAttribute("coureurAffect",resultatService.getByEtapeAndEquipe(etapes, equipe));
         return Index.redirectLogin(session.getAttribute("user"), "user", "pages/client/FormJoueur");
+    }
+
+    @GetMapping("/coureur/etape")
+    public String getCoureurEtape(Model model){
+        List<Etapes> etapes=service.getAll();
+        Equipe equipe=(Equipe)session.getAttribute("user");
+        for (int i = 0; i < etapes.size(); i++) {
+            etapes.get(i).setResultats(resultatService.getByCoureurAndEtapeOrder(etapes.get(i), equipe));
+        }
+        model.addAttribute("etapes",etapes);
+        return Index.redirectLogin(session.getAttribute("user"), "user", "pages/client/CoureurEtape");
     }
 
     @PostMapping("/valideJoueur")
@@ -96,7 +107,7 @@ public class EtapesControleur {
                     Resultat result=new Resultat();
                     result.setEtape(etape);
                     result.setCoureur(coureurs);
-                    result.setTemps(LocalTime.parse("00:00:00"));
+                    result.setTemps(null);
                     result.setPoint(0);
                     result.setTempsArrive(null);
                     result.setEquipe(coureurs.getEquipe());
@@ -112,7 +123,7 @@ public class EtapesControleur {
 
     @GetMapping("/etapeAdmin")
     public String listeEtapeAdmin(Model model){
-        Course cours=courseService.getById((long)1).get();
+        Course cours=courseService.getById((long)2).get();
         model.addAttribute("etapes", cours.getEtapes());
         return Index.redirectLogin(session.getAttribute("admin"), "admin", "pages/admin/etapeListe");
     }

@@ -3,6 +3,7 @@ package com.spring.hard.service;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,128 +12,117 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.stereotype.Service;
 
+import com.spring.hard.csvObject.EtapeCsv;
+import com.spring.hard.csvObject.PointCsv;
+import com.spring.hard.csvObject.ResultatCsv;
 // import com.spring.hard.csvObject.Devis;
 // import com.spring.hard.csvObject.MaisonTrav;
 import com.spring.hard.errorControle.CsvException;
 import com.spring.hard.function.Function;
+import com.spring.hard.models.Etapes;
 
 @Service
 public class CSVService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     
-    public void csvToBase(MultipartFile csv) throws CsvException {
-        /*String tableName = csv.getOriginalFilename().split("\\.")[0] + "CSV";
-        List<MaisonTrav> data = Function.importCSVMaisonTrav(csv);
+    public void csvToBaseEtape(MultipartFile csv) throws CsvException {
+        List<EtapeCsv> data = Function.importCSVEtape(csv);
         
-        // Create table if not exists
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " ("
-                + "Type_maison VARCHAR(100),"
-                + "Description VARCHAR(100),"
-                + "Surface decimal(9,2),"
-                + "Code_travaux VARCHAR(5),"
-                + "Type_travaux VARCHAR(100),"
-                + "Unite VARCHAR(5),"
-                + "Prix_unitaire decimal(9,2),"
-                + "Quantite decimal(9,2),"
-                + "Dure_travaux int"
-                + ")";
-        jdbcTemplate.update(createTableQuery);
-        
-        String insertQuery = "INSERT INTO " + tableName + " (Type_maison, Description, Surface, Code_travaux, Type_travaux, Unite, Prix_unitaire, Quantite, Dure_travaux) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String insertQuery = "INSERT INTO etapes (nom,longueur,nombre_equipe,rang,temps_depart,id_course) VALUES (?, ?, ?, ?, ?, ?)";
         
         jdbcTemplate.batchUpdate(insertQuery, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                MaisonTrav ligne = data.get(i);
-                ps.setString(1, ligne.getType_maison());
-                ps.setString(2, ligne.getDescription());
-                ps.setDouble(3, ligne.getSurface());
-                ps.setString(4, ligne.getCode_travaux());
-                ps.setString(5, ligne.getType_travaux());
-                ps.setString(6, ligne.getUnite());
-                ps.setDouble(7, ligne.getPrix_unitaire());
-                ps.setDouble(8, ligne.getQuantite());
-                ps.setInt(9, ligne.getDure_travaux());
+                EtapeCsv ligne = data.get(i);
+                ps.setString(1, ligne.getEtape());
+                ps.setDouble(2, ligne.getLongueur());
+                ps.setDouble(3, ligne.getNbCoureur());
+                ps.setInt(4, ligne.getRang());
+                Timestamp depart=Timestamp.from(ligne.getDepart().toInstant());
+                ps.setTimestamp(5, depart);
+                ps.setInt(6, 2);
             }
             @Override
             public int getBatchSize() {
                 return data.size();
             }
         });
-        
-        String maisonInsert = "INSERT INTO typemaison (intitule, surface, description, dure) "
-                + "SELECT DISTINCT type_maison, CAST(surface AS decimal), description, 0 FROM " + tableName;
-        jdbcTemplate.execute(maisonInsert);
-    
-        String travauxInsert = "INSERT INTO travaux (code, desigantion) "
-                + "SELECT DISTINCT CAST(code_travaux AS int), type_travaux FROM " + tableName;
-        jdbcTemplate.execute(travauxInsert);
-    
-        String partage = "INSERT INTO prestation (prix_unitaire, quantite, id_travaux, id_type, unite, dure) "
-                + "SELECT CAST(prix_unitaire AS decimal), CAST(quantite AS decimal), travaux.id_travaux, typemaison.id_type, unite, CAST(dure_travaux AS int) "
-                + "FROM " + tableName + " "
-                + "JOIN travaux ON " + tableName + ".type_travaux = travaux.desigantion "
-                + "JOIN typemaison ON " + tableName + ".type_maison = typemaison.intitule";
-        jdbcTemplate.execute(partage);
-        */
     }
 
-    public void csvDevisToBase(MultipartFile csv) throws CsvException {
-        /*
-        String tableName = csv.getOriginalFilename().split("\\.")[0] + "CSV";
-        List<Devis> data = Function.importCSVDevis(csv);
-    
-        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " ("
-                + "client VARCHAR(100),"
-                + "ref_devis VARCHAR(100),"
-                + "type_maison VARCHAR(100),"
-                + "finition VARCHAR(100),"
-                + "taux_finition decimal(9,2),"
-                + "date_devis date,"
-                + "date_debut date,"
-                + "lieu VARCHAR(100)"
-                + ")";
-        jdbcTemplate.update(createTableQuery);
-    
-        String insertQuery = "INSERT INTO " + tableName + " (client, ref_devis, type_maison, finition, taux_finition, date_devis, date_debut, lieu) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    public void csvToBasePoint(MultipartFile csv) throws CsvException {
+        List<PointCsv> data = Function.importCSVPoint(csv);
+        
+        String insertQuery = "INSERT INTO point (classement,point) VALUES (?, ?)";
         
         jdbcTemplate.batchUpdate(insertQuery, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                Devis ligne = data.get(i);
-                ps.setString(1, ligne.getClient());
-                ps.setString(2, ligne.getRef_devis());
-                ps.setString(3, ligne.getType_maison());
-                ps.setString(4, ligne.getFinition());
-                ps.setDouble(5, ligne.getTaux_finition());
-                ps.setDate(6, ligne.getDate_devis());
-                ps.setDate(7,ligne.getDate_debut());
-                ps.setString(8, ligne.getLieu());
+                PointCsv ligne = data.get(i);
+                ps.setInt(1, ligne.getClassement());
+                ps.setInt(2, ligne.getPoint());
             }
-            
+            @Override
+            public int getBatchSize() {
+                return data.size();
+            }
+        });
+    }
+
+    public void csvDevisToBaseResultat(MultipartFile csv) throws CsvException {
+        
+        String tableName = "tempResultatCSV";
+        List<ResultatCsv> data = Function.importCSVResultat(csv);
+    
+        String createTableQuery = "CREATE TABLE IF NOT EXISTS " + tableName + " ("
+                + "etape_rang int,"
+                + "numero_dossard int,"
+                + "nom VARCHAR(100),"
+                + "genre VARCHAR(5),"
+                + "date_naissance date,"
+                + "equipe VARCHAR(50),"
+                + "arrivee timestamp(6)"
+                + ")";
+        jdbcTemplate.update(createTableQuery);
+    
+        String insertQuery = "INSERT INTO " + tableName + " (etape_rang, numero_dossard, nom, genre, date_naissance, equipe, arrivee) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        
+        jdbcTemplate.batchUpdate(insertQuery, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ResultatCsv ligne = data.get(i);
+                ps.setInt(1, ligne.getEtape_rang());
+                ps.setInt(2, ligne.getDossard());
+                ps.setString(3, ligne.getNom());
+                ps.setString(4, ligne.getGenre());
+                ps.setDate(5, ligne.getNaissance());
+                ps.setString(6, ligne.getEquipe());
+                Timestamp arrive=Timestamp.from(ligne.getArrive().toInstant());
+                ps.setTimestamp(7,arrive);
+            }
             @Override
             public int getBatchSize() {
                 return data.size();
             }
         });
     
-        String clientInsert = "INSERT INTO utilisateur (numero, isadmin) "
-                + "SELECT DISTINCT client, 0 FROM " + tableName;
+        String clientInsert = "INSERT INTO equipe (authentification, is_admin,mot_de_passe) "
+                + "SELECT DISTINCT equipe,0,equipe FROM " + tableName;
         jdbcTemplate.execute(clientInsert);
     
-        String finitionInsert = "INSERT INTO finition (finition, taux) "
-                + "SELECT DISTINCT finition, taux_finition FROM " + tableName;
+        String finitionInsert = "INSERT INTO coureur (dossard,nom,genre,naissance,id_equipe) "+
+            "SELECT DISTINCT "+
+            "numero_dossard,nom,genre,date_naissance,id_equipe "+
+            "FROM "+tableName+" "+
+            "JOIN equipe ON "+tableName+".equipe=equipe.authentification";
         jdbcTemplate.execute(finitionInsert);
-    
-        String demandeInsert = "INSERT INTO demande (date_demande, date_realisation, id_type, id_utlisateur, id_finition, reference, lieu, etat, prix, prix_vente) "
-                + "SELECT date_devis, date_debut, typemaison.id_type, utilisateur.id_utilisateur, finition.id_finition, ref_devis, lieu, 0, 0, 0 "
-                + "FROM " + tableName + " "
-                + "JOIN typemaison ON " + tableName + ".type_maison = typemaison.intitule "
-                + "JOIN utilisateur ON " + tableName + ".client = utilisateur.numero "
-                + "JOIN finition ON " + tableName + ".finition = finition.finition";
+        
+        String demandeInsert = "INSERT INTO resultat (temps_arrive,id_coureur,id_etape,id_equipe) SELECT "+
+        "arrivee,coureur.id_coureur,id_etape,coureur.id_equipe "+
+        "from "+tableName+" "+
+        "join coureur on "+tableName+".numero_dossard=coureur.dossard "+
+        "join etapes on "+tableName+".etape_rang=etapes.rang";
         jdbcTemplate.execute(demandeInsert);
-         */
     }
     
 

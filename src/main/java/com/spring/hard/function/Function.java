@@ -14,6 +14,10 @@ import java.nio.file.StandardCopyOption;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -21,6 +25,9 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.opencsv.CSVReader;
+import com.spring.hard.csvObject.EtapeCsv;
+import com.spring.hard.csvObject.PointCsv;
+import com.spring.hard.csvObject.ResultatCsv;
 import com.spring.hard.errorControle.CsvException;
 
 public class Function {
@@ -201,50 +208,126 @@ public class Function {
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
     }
     
-    // public static List<MaisonTrav> importCSVMaisonTrav(MultipartFile file) throws CsvException {
-    //     List<MaisonTrav> dataMaison = new ArrayList<>();
-    //     List<String> erreur = new ArrayList<>();
+    public static List<EtapeCsv> importCSVEtape(MultipartFile file) throws CsvException {
+        List<EtapeCsv> etape = new ArrayList<>();
+        List<String> erreur = new ArrayList<>();
         
-    //     try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
-    //         String[] nextLine;
-    //         boolean isFirstLine = true;
-    //         int i = 1;
+        try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
+            String[] nextLine;
+            boolean isFirstLine = true;
+            int i = 1;
             
-    //         while ((nextLine = reader.readNext()) != null) {
-    //             if (isFirstLine) {
-    //                 isFirstLine = false;
-    //                 continue;
-    //             }
-    //             try {
-    //                 MaisonTrav line = new MaisonTrav();
-    //                 line.setType_maison(nextLine[0]);
-    //                 line.setDescription(nextLine[1]);
-    //                 line.setSurface(nextLine[2]);
-    //                 line.setCode_travaux(nextLine[3]);
-    //                 line.setType_travaux(nextLine[4]);
-    //                 line.setUnite(nextLine[5]);
-    //                 line.setPrix_unitaire(nextLine[6]);
-    //                 line.setQuantite(nextLine[7]);
-    //                 line.setDure_travaux(nextLine[8]);
-    //                 dataMaison.add(line);
-    //             } catch (Exception e) {
-    //                 erreur.add(e.getMessage() + " ligne numero:" + i);
-    //                 i++;
-    //                 continue;
-    //             }
-    //             i++;
-    //         }
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //     }
-    //     if (erreur.size() > 0) {
-    //         CsvException csvException = new CsvException();
-    //         csvException.setError(erreur);
-    //         throw csvException;
-    //     }
-    //     return dataMaison;
-    // }
+            while ((nextLine = reader.readNext()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+                try {
+                    EtapeCsv line = new EtapeCsv();
+                    line.setEtape(nextLine[0]);
+                    line.setLongueur(nextLine[1]);
+                    line.setNbCoureur(nextLine[2]);
+                    line.setRang(nextLine[3]);
+                    line.setDepart(nextLine[4]+" "+nextLine[5]);
+                    etape.add(line);
+                } catch (Exception e) {
+                    erreur.add(e.getMessage() + " ligne numero:" + i +" du csv etape");
+                    i++;
+                    continue;
+                }
+                i++;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (erreur.size() > 0) {
+            CsvException csvException = new CsvException();
+            csvException.setError(erreur);
+            throw csvException;
+        }
+        return etape;
+    }
     
+    public static List<PointCsv> importCSVPoint(MultipartFile file) throws CsvException {
+        List<PointCsv> point = new ArrayList<>();
+        List<String> erreur = new ArrayList<>();
+        
+        try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
+            String[] nextLine;
+            boolean isFirstLine = true;
+            int i = 1;
+            
+            while ((nextLine = reader.readNext()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+
+                try {
+                    PointCsv line = new PointCsv();
+                    line.setClassement(nextLine[0]);
+                    line.setPoint(nextLine[1]);
+                    point.add(line);
+                } catch (Exception e) {
+                    erreur.add(e.getMessage() + " ligne numero:" + i +" du csv point");
+                    i++;
+                    continue;
+                }
+                i++;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (erreur.size() > 0) {
+            CsvException csvException = new CsvException();
+            csvException.setError(erreur);
+            throw csvException;
+        }
+        return point;
+    }
+
+    public static List<ResultatCsv> importCSVResultat(MultipartFile file) throws CsvException {
+        List<ResultatCsv> resultat = new ArrayList<>();
+        List<String> erreur = new ArrayList<>();
+        
+        try (CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
+            String[] nextLine;
+            boolean isFirstLine = true;
+            int i = 1;
+            
+            while ((nextLine = reader.readNext()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+                try {
+                    ResultatCsv line = new ResultatCsv();
+                    line.setEtape_rang(nextLine[0]);
+                    line.setDossard(nextLine[1]);
+                    line.setNom(nextLine[2]);
+                    line.setGenre(nextLine[3]);
+                    line.setNaissance(nextLine[4]);
+                    line.setEquipe(nextLine[5]);
+                    line.setArrive(nextLine[6]);
+                    resultat.add(line);
+                } catch (Exception e) {
+                    erreur.add(e.getMessage() + " ligne numero:" + i +" du csv resultat");
+                    i++;
+                    continue;
+                }
+                i++;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (erreur.size() > 0) {
+            CsvException csvException = new CsvException();
+            csvException.setError(erreur);
+            throw csvException;
+        }
+        return resultat;
+    }
+
     // public static List<Devis> importCSVDevis(MultipartFile file) throws CsvException {
     //     List<Devis> dataDevis = new ArrayList<>();
     //     List<String> erreur = new ArrayList<>();
@@ -295,4 +378,12 @@ public class Function {
         java.util.Date newDate = calendar.getTime();
         return new java.sql.Date(newDate.getTime());
     }
+
+    public static ZonedDateTime stringToZoneDateTime(String dateTime){
+        DateTimeFormatter formatterWithoutZone = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        LocalDateTime ldt = LocalDateTime.parse(dateTime, formatterWithoutZone);
+        ZonedDateTime zdt = ZonedDateTime.of(ldt, ZoneId.systemDefault());
+        return zdt;
+    }
+
 }

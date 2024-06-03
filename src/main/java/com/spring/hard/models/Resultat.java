@@ -35,4 +35,5 @@ public class Resultat {
     @JoinColumn(name = "id_equipe",nullable = false)
     Equipe equipe;
     int point;
+
 }

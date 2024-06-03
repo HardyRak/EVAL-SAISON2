@@ -8,9 +8,17 @@ import com.spring.hard.models.Equipe;
 import com.spring.hard.models.Etapes;
 import com.spring.hard.models.Resultat;
 import com.spring.hard.repository.ResultatRepository;
+import com.spring.hard.vieuw.ClassementEquipe;
+import com.spring.hard.vieuw.ClassementGEquipe;
+
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import java.math.BigDecimal;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.data.domain.Sort;
 
@@ -18,7 +26,12 @@ import org.springframework.data.domain.Sort;
 public class ResultatService {
     @Autowired
     private ResultatRepository repository;
-
+    @Autowired
+    private CoureurService coureurService;
+    @Autowired
+    private EquipeService equipeService;
+    @Autowired
+    private CourseService courseService;
     public Resultat saveOrUpdate(Resultat entity) {
         return repository.save(entity);
     }
@@ -46,11 +59,81 @@ public class ResultatService {
     }
 
     public List<Resultat> getByEtape(Etapes etapes){
-        return repository.findByEtape(etapes,Sort.by("tempsArrive").descending());
+        return repository.findByEtape(etapes,Sort.by("point").descending());
     }
 
     public List<Resultat> getByEquipe(Equipe equipe){
-        return repository.findByEquipe(equipe,Sort.by("tempsArrive").descending());
+        return repository.findByEquipe(equipe,Sort.by("point").descending());
+    }
+
+    public List<Resultat> getClassementEquipe(int id_equipe){
+        List<Object[]> result=repository.getClassementEquipe(id_equipe);
+        List<Resultat> resultats=new ArrayList<>();
+        for (Object[] row : result) {
+            Resultat resultat = new Resultat();
+            resultat.setCoureur(coureurService.getById((long) row[0]).get());
+            resultat.setPoint(Integer.parseInt( row[1].toString()));
+            
+            resultat.setTemps(LocalTime.parse(row[2].toString()));
+        
+            resultats.add(resultat);
+        }
+        return resultats;
+    }
+
+    public List<ClassementGEquipe> getResultatDesEquipe(){
+        List<ClassementGEquipe> classement=new ArrayList<>();
+        List<Object[]> classementBase=repository.getClassementDesEquipe();
+        for (int i = 0; i < classementBase.size(); i++) {
+            ClassementGEquipe classe=new ClassementGEquipe();
+            classe.setEquipe(equipeService.getById((long)Integer.parseInt(classementBase.get(i)[0].toString())).get());
+            classe.setPoint(Integer.parseInt(classementBase.get(i)[1].toString()));
+            classement.add(classe);
+        }
+        return classement;
+    }
+
+    public List<ClassementGEquipe> getClassementParCategorie(int id_etape,int id_categorie){
+        List<ClassementGEquipe> classementGEquipes=new ArrayList<>();
+        List<Object[]> result=repository.getClassementCategorie(id_etape,id_categorie);
+        for (int i = 0; i < result.size(); i++) {
+            ClassementGEquipe classe=new ClassementGEquipe();
+            classe.setEquipe(equipeService.getById((long)Integer.parseInt(result.get(i)[0].toString())).get());
+            classe.setPoint(Integer.parseInt(result.get(i)[3].toString()));
+            classementGEquipes.add(classe);
+        }
+        classementGEquipes.sort(Comparator.comparingInt(ClassementGEquipe::getPoint).reversed());
+        return classementGEquipes;
+    }
+
+    public List<ClassementGEquipe> getClassementGeneralCategorie(int id_categorie) {
+        Course course = courseService.getById((long) 2).get();
+        List<Etapes> etapes = course.getEtapes();
+        for (int i = 0; i < etapes.size(); i++) {
+            etapes.get(i).setClassementGEquipes(this.getClassementParCategorie((int) etapes.get(i).getId_etape(), id_categorie));
+        }
+    
+        List<Equipe> equipes = equipeService.getAll();
+        List<ClassementGEquipe> result = new ArrayList<>();
+        for (int i = 0; i < equipes.size(); i++) {
+            int point = 0;
+            for (int j = 0; j < etapes.size(); j++) {
+                List<ClassementGEquipe> classetape = etapes.get(j).getClassementGEquipes();
+                for (int j2 = 0; j2 < classetape.size(); j2++) {
+                    if (classetape.get(j2).getEquipe().getId_equipe() == equipes.get(i).getId_equipe()) {
+                        point += classetape.get(j2).getPoint();
+                    }
+                }
+            }
+            ClassementGEquipe classe = new ClassementGEquipe();
+            classe.setEquipe(equipes.get(i));
+            classe.setPoint(point);
+            result.add(classe);
+        }
+        
+        result.sort(Comparator.comparingInt(ClassementGEquipe::getPoint).reversed());
+    
+        return result;
     }
 
     public Resultat getByCoureurEtEtape(Coureur coureur,Etapes etapes){
@@ -68,5 +151,10 @@ public class ResultatService {
     public List<Resultat> getByEtapeAndTempsArriveIsNotNull(Etapes etapes){
         return repository.findByEtapeAndTempsArriveIsNotNull(etapes);
     }
+    
+    public List<Resultat>  getByCoureurAndEtapeOrder(Etapes etapes,Equipe equipe){
+        return repository.findByEtapeAndEquipe(etapes, equipe,Sort.by("temps").descending());
+    }
+
 
 }

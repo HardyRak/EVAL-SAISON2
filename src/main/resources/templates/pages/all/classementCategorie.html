@@ -16,48 +16,51 @@
     <link rel="stylesheet" href="../../plugins/bootstrap/css/bootstrap.css">
 </head>
 <body>
-  <div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Demande</h3>
-    </div>
-    <div class="card-body">
-        <div class="col-md-8 offset-md-2">
-          <form id="searchform">
-            <div class="input-group">
-              <input type="search" id="search" class="form-control form-control-lg" placeholder="Votre recherche ici">
-            </div>
-          </form>
-        </div>
 
-        <div class="btn-group" style="margin-bottom: 15px;">
-            <button type="button" class="btn btn-info" onclick="exportAPItoPDF()">PDF</button>
+<div class="container">
+    <div class="row">
+      <div class="col-md-12" style="margin-top: 15px;">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title" th:text="${' Categorie: ' + categorie.nom}"></h3>
+            <a th:href="@{/classement/categorie/generale(id_categorie=${categorie.id_categorie})}">
+              <button class="btn btn-block btn-info">
+                  Classement général de cette catégorie
+              </button>
+          </a>
+          </div>
         </div>
-        
-        <table id="data" class="table table-bordered">
-            <thead>
-                <tr>
-              <th>Nom
-              </th>
-              <th>Dossard
-              </th>
-              <th>Temps
-              </th>
-              <th>Point
-                </tr>
-            </thead>
-            <tbody id="tbody">
-                <tr th:each="resultat :${resultats}" >
-                    <td th:text="${resultat.coureur.nom}"></td>
-                    <td th:text="${resultat.coureur.dossard}"></td>
-                    <td th:text="${resultat.temps}"></td>
-                    <td th:text="${resultat.tempsArrive}"></td>
-                    <td th:text="${resultat.point}"></td>
-                </tr>
-            </tbody>
-        </table>  
       </div>
-    </div>
-
+        <div class="col-md-12" style="margin-top: 15px;" th:each="etape :${etapes}">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title" th:text="${etape.nom}">Demande</h3>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" style="margin-bottom: 15px;">
+                        <button type="button" class="btn btn-info" onclick="exportAPItoPDF()">PDF</button>
+                    </div>
+                    
+                    <table id="data" class="table table-bordered">
+                        <thead>
+                            <tr>
+                           <th>Nom
+                           </th>
+                           <th>Point
+                           </th>
+                        </thead>
+                        <tbody id="tbody">
+                            <tr th:each="resultat :${etape.classementGEquipes}" >
+                                <td th:text="${resultat.equipe.authentification}"></td>
+                                <td th:text="${resultat.point}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+          </div>        
+      </div>
+  </div>
+</body>
 <script type="text/javascript" src="../../plugins/pdf/jspdf.umd.js"></script>
 <script type="text/javascript" src="../../plugins/pdf/basic.js"></script>
 <script type="text/javascript" src="../../plugins/pdf/jspdf.plugin.autotable.min.js"></script>

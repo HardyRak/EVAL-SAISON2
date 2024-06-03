@@ -98,6 +98,11 @@ public class Index {
         return "pages/importCSV";
     }
 
+    @GetMapping("/CSV/point")
+    public String pageImportpoint(){
+        return Index.redirectLogin(httpSession.getAttribute("admin"), "admin", "pages/importCSVPoint");
+    }
+
     @GetMapping("TableExportPdf")
     public String tableExport(){
         return "pages/admin/detailDevis";
@@ -115,14 +120,36 @@ public class Index {
         response.setContentType("application/json");
         
         try {
-            CSVservice.csvToBase(csv1);
-            CSVservice.csvDevisToBase(csv2);
-            Function.saveFile(csv1, "uploads/csv/" + csv1.getOriginalFilename());
-            Function.saveFile(csv1, "uploads/csv/" + csv2.getOriginalFilename());
+            CSVservice.csvToBaseEtape(csv1);
+             CSVservice.csvDevisToBaseResultat(csv2);
+            // Function.saveFile(csv1, "uploads" + csv1.getOriginalFilename());
+            // Function.saveFile(csv1, "uploads" + csv2.getOriginalFilename());
             
             Map<String, String> successMessage = new HashMap<>();
             successMessage.put("message", "Importation reussi");
             
+            response.setStatus(HttpStatus.OK.value());
+            response.getWriter().write(gson.toJson(successMessage));
+        } catch (CsvException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Erreur lors de l'importation");
+            errorResponse.put("errors", e.getError());
+            System.out.println(e.getError());
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+            response.getWriter().write(gson.toJson(errorResponse));
+        }
+    }
+
+    @PostMapping("/import/csv/point")
+    @Transactional
+    public void importCSVPoint(@RequestParam("csv") MultipartFile csv,HttpServletResponse response) throws IOException {
+        Gson gson = new Gson();
+        response.setContentType("application/json");
+        
+        try {
+            CSVservice.csvToBasePoint(csv);
+            Map<String, String> successMessage = new HashMap<>();
+            successMessage.put("message", "Importation reussi");
             response.setStatus(HttpStatus.OK.value());
             response.getWriter().write(gson.toJson(successMessage));
         } catch (CsvException e) {
@@ -142,22 +169,41 @@ public class Index {
 
     @GetMapping("/truncate")
     @ResponseBody
-    public void truncateDatabase(){
-        String query="DO $$DECLARE \n"+
-            " r RECORD;\n"+
-        " BEGIN\n"+
-            "EXECUTE 'SET session_replication_role = replica';\n"+
-            
-            "FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public' and tablename<>'Equipe')\n"+
-            " LOOP\n"+
-                "EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' CASCADE';\n"+
-            " END LOOP;\n"+
-            
-            " EXECUTE 'SET session_replication_role = DEFAULT';\n"+
-        " END\n"+
-        "$$;\n";
-        String deleteUser="delete from Equipe where is_admin<>'1';";
+    public void truncateDatabase() {
+        String query = "DO $$DECLARE \n" +
+                " r RECORD;\n" +
+                " BEGIN\n" +
+                "EXECUTE 'SET session_replication_role = replica';\n" +
+                "FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename NOT IN ('categorie','equipe', 'course'))\n" +
+                " LOOP\n" +
+                "EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' CASCADE';\n" +
+                " END LOOP;\n" +
+                " EXECUTE 'SET session_replication_role = DEFAULT';\n" +
+                " END\n" +
+                "$$;";
+        String deleteUser = "DELETE FROM Equipe WHERE is_admin = 0;";
+        String resetSequences = "DO $$\n" +
+                "DECLARE\n" +
+                "    r RECORD;\n" +
+                "BEGIN\n" +
+                "    FOR r IN (SELECT sequence_name, sequence_schema \n" +
+                "              FROM information_schema.sequences\n" +
+                "              WHERE sequence_schema = 'public' AND sequence_name IN ('course_id_seq'))\n" +
+                "    LOOP\n" +
+                "        EXECUTE format('ALTER SEQUENCE %I.%I RESTART WITH 2', r.sequence_schema, r.sequence_name);\n" +
+                "    END LOOP;\n" +
+                "END $$;";
+    
         jdbcTemplate.execute(query);
         jdbcTemplate.execute(deleteUser);
+        jdbcTemplate.execute(resetSequences);
     }
+
+    @GetMapping("/generateCateg")
+    @ResponseBody
+    public void generationCategorie() {
+        String query = "select updateCategorieCoureur()";
+        jdbcTemplate.execute(query);
+    }
+
 }

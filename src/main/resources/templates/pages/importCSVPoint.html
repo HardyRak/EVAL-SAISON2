@@ -16,25 +16,14 @@
                 <form enctype="multipart/form-data" id="form">
                     <div class="card" style="margin-top: 15px;">
                         <div class="card-header">
-                            <label for="exampleInputFile">Importation des donnés</label>
+                            <label for="exampleInputFile">Importation des donnés de point</label>
                         </div>
                         <div class="card-body">
                             <div class="form-group">
                                 <div class="input-group">
                                     <div class="custom-file">
-                                        <input type="file" class="custom-file-input" accept=".csv" id="exampleInputFile" name="csv1">
-                                        <label class="custom-file-label" for="exampleInputFile">Etapes</label>
-                                    </div>
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">Upload</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="input-group">
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" accept=".csv" id="exampleInputFile" name="csv2">
-                                        <label class="custom-file-label" for="exampleInputFile">Resultats</label>
+                                        <input type="file" class="custom-file-input" accept=".csv" id="exampleInputFile" name="csv">
+                                        <label class="custom-file-label" for="exampleInputFile">Point</label>
                                     </div>
                                     <div class="input-group-append">
                                         <span class="input-group-text">Upload</span>
@@ -91,7 +80,7 @@
 
                 $.ajax({
                     type: 'POST',
-                    url: '/import/csv',
+                    url: '/import/csv/point',
                     data: formData,
                     contentType: false,
                     processData: false,

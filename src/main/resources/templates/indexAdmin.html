@@ -110,9 +110,17 @@
               </ul>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                    <a href="/classement/admin/equipe" class="nav-link">
+                    <a href="/classement/etape/equipe?id_categorie=0" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>classement par equipe</p>
+                  </a>
+                </li>
+              </ul>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="/classement/equipe/generale" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>classement General des equipe</p>
                   </a>
                 </li>
               </ul>
@@ -122,7 +130,7 @@
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-table"></i>
                 <p>
-                  Import
+                  Import csv
                   <i class="fas fa-angle-left right"></i>
                 </p>
               </a>
@@ -130,7 +138,15 @@
                 <li class="nav-item">
                     <a href="CSV" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
-                    <p>CSV</p>
+                    <p>étape et Resultats</p>
+                  </a>
+                </li>
+              </ul>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                    <a href="CSV/point" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Points</p>
                   </a>
                 </li>
               </ul>
@@ -145,6 +161,9 @@
             </li>
             <button class="btn btn-block btn-outline-danger btn-xs toastsDefaultDanger" onclick="truncatedata()">
               Effacé les donn&eacute;es
+            </button>
+            <button class="btn btn-block btn-outline-success btn-xs toastsDefaultSuccess" onclick="generationCategorie()">
+              Generé les categorie
             </button>
         </ul>
       </nav>
@@ -209,6 +228,22 @@
       }
     })
   }
+
+  function generationCategorie() {
+    $.ajax({
+      url:'/generateCateg',
+      method:'GET',
+      dataType:'json',
+      success:function(response){
+        
+      },
+      error:function (xhr,status,error) {
+        console.log(error);
+        $('.alert.alert-danger').show();
+      }
+    })
+  }
+
 </script>
 <script src="plugins/toastr/toastr.min.js"></script>
 <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>

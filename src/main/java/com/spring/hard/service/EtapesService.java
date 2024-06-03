@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.spring.hard.models.Course;
 import com.spring.hard.models.Etapes;
+import com.spring.hard.models.Resultat;
 import com.spring.hard.repository.EtapesRepository;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -41,4 +42,6 @@ public class EtapesService {
     public void deleteById(Long id) {
         repository.deleteById(id);
     }
+
+
 }
