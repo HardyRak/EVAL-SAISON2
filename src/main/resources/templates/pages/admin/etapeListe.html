@@ -54,7 +54,7 @@
                     <td th:text="${etape.rang}"></td>
                     <td th:text="${etape.tempsDepart.toLocalTime()}"></td>
                     <td th:text="${etape.longueur}"></td>
-                    <td><a th:href="@{/formUpdate(etape=${etape.id_etape})}"><button class="btn btn-block btn-info"> Temps coureur </button></a></td>
+                    <td><a th:href="@{/classement/etape(id_etape=${etape.id_etape})}"><button class="btn btn-block btn-info"> Classement des coureur </button></a></td>
                 </tr>
             </tbody>
         </table>

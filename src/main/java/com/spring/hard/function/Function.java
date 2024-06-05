@@ -15,6 +15,7 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -406,6 +407,30 @@ public class Function {
             throw new IllegalArgumentException("Invalid date and time format: " + dateTime);
         }
         return zdt;
+    }
+
+    public static ZonedDateTime subtractLocalTimeAndZone(ZonedDateTime dateTime, LocalTime time) {
+        LocalDateTime localDateTime = dateTime.toLocalDateTime().minusNanos(time.toNanoOfDay());
+        return ZonedDateTime.of(localDateTime, dateTime.getZone());
+    }
+
+    public static LocalTime addLocalTime(LocalTime time1, LocalTime time2) {
+        return time1.plusHours(time2.getHour())
+                .plusMinutes(time2.getMinute())
+                .plusSeconds(time2.getSecond())
+                .plusNanos(time2.getNano());
+    }
+
+    public static LocalTime subtractLocalTime(LocalTime time1, LocalTime time2) {
+        int hours = time2.getHour();
+        int minutes = time2.getMinute();
+        int seconds = time2.getSecond();
+        int nanos = time2.getNano();
+
+        return time1.minusHours(hours)
+                .minusMinutes(minutes)
+                .minusSeconds(seconds)
+                .minusNanos(nanos);
     }
 
 }

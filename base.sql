@@ -216,18 +216,29 @@ CREATE OR REPLACE FUNCTION updateCategorieCoureur() RETURNS VOID AS $$
 DECLARE
     table_coureur coureur%ROWTYPE;
     categorie_genre categorie%ROWTYPE;
+    verif categorie_coureur%ROWTYPE;
 BEGIN
     FOR table_coureur IN
         SELECT *
         FROM coureur
     LOOP
         SELECT * INTO categorie_genre FROM categorie WHERE nom = table_coureur.genre;
-        RAISE NOTICE '%',categorie_genre;
-        EXECUTE 'INSERT INTO categorie_coureur(id_coureur,id_categorie) VALUES ($1, $2)' USING table_coureur.id_coureur, categorie_genre.id_categorie;
+        SELECT * INTO verif FROM categorie_coureur WHERE id_categorie = categorie_genre.id_categorie AND id_coureur = table_coureur.id_coureur;
+        IF verif IS NULL THEN
+            RAISE NOTICE '%', categorie_genre;
+            EXECUTE 'INSERT INTO categorie_coureur(id_coureur, id_categorie) VALUES ($1, $2)' USING table_coureur.id_coureur, categorie_genre.id_categorie;
+        END IF;
+
         IF date_part('year', age(table_coureur.naissance)) < 18 THEN
-            EXECUTE 'INSERT INTO categorie_coureur(id_coureur,id_categorie) VALUES ($1, 7)' USING table_coureur.id_coureur;
+            SELECT * INTO verif FROM categorie_coureur WHERE id_categorie = 8 AND id_coureur = table_coureur.id_coureur;
+            IF verif IS NULL THEN
+                EXECUTE 'INSERT INTO categorie_coureur(id_coureur, id_categorie) VALUES ($1, 8)' USING table_coureur.id_coureur;
+            END IF;
         ELSIF date_part('year', age(table_coureur.naissance)) >= 18 THEN
-            EXECUTE 'INSERT INTO categorie_coureur(id_coureur,id_categorie) VALUES ($1, 8)' USING table_coureur.id_coureur;
+            SELECT * INTO verif FROM categorie_coureur WHERE id_categorie = 7 AND id_coureur = table_coureur.id_coureur;
+            IF verif IS NULL THEN
+                EXECUTE 'INSERT INTO categorie_coureur(id_coureur, id_categorie) VALUES ($1, 7)' USING table_coureur.id_coureur;
+            END IF;
         END IF;
     END LOOP;
 END;
@@ -318,3 +329,39 @@ FROM resultRank
 LEFT JOIN pointRank ON resultRank.rank = pointRank.classement
 GROUP BY resultRank.id_equipe
 ORDER BY min_temps;
+
+-------------------------------------------------------------FONCTION PENALITE----------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION addPenalite(id_etapeNEW int,id_equipeNEW int,timeAdd TIME) RETURNS VOID AS $$
+DECLARE
+    resultatSET RECORD;
+    newTemps TIMESTAMP;
+BEGIN
+    EXECUTE 'INSERT INTO penalite (temps,id_equipe,id_etape,etat) VALUES($1,$2,$3,0)' USING timeAdd,id_equipeNEW,id_etapeNEW;
+    FOR resultatSET IN
+        SELECT * FROM resultat as res WHERE res.id_etape=id_etapeNEW AND res.id_equipe=id_equipeNEW
+    LOOP
+        newTemps=resultatSET.temps_arrive+timeAdd::time;
+        EXECUTE 'UPDATE resultat SET temps_arrive=$1 WHERE id_etape=$2 AND id_coureur=$3' USING newTemps,id_etapeNEW,resultatSET.id_coureur;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION removePenalite(id_penaliteNEW int) RETURNS VOID AS $$
+DECLARE
+    penaliteNew RECORD;
+    resultatSET RECORD;
+    diffTemps TIMESTAMP;
+BEGIN
+    SELECT * INTO penaliteNEw FROM penalite WHERE id_penalite=id_penaliteNEW;
+    EXECUTE 'UPDATE penalite SET etat=1 where id_penalite=$1' USING id_penaliteNEW;
+    FOR resultatSET IN
+        SELECT * FROM resultat WHERE id_equipe=penaliteNEw.id_equipe AND id_etape=penaliteNEw.id_etape
+    LOOP
+        diffTemps=resultatSET.temps_arrive-penaliteNew.temps;
+        EXECUTE 'UPDATE resultat SET temps_arrive=$1 WHERE id_etape=$2 AND id_coureur=$3' USING diffTemps,resultatSET.id_etape,resultatSET.id_coureur;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;

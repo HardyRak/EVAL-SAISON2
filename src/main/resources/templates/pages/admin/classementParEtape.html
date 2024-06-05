@@ -19,10 +19,10 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-md-12" style="margin-top: 15px;" th:each="etape :${etapes}">
+        <div class="col-md-12" style="margin-top: 15px;">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title" th:text="${etape.nom}">Demande</h3>
+                    <h3 class="card-title" th:text="${etape.nom}"></h3>
                 </div>
                 <div class="card-body">
                     <div class="btn-group" style="margin-bottom: 15px;">
@@ -35,9 +35,12 @@
                           <th>Rang</th>
                            <th>Nom
                            </th>
+                           <th>Genre
+                        </th>
                            <th>Dossard
                            </th>
-                           <th>Temps
+                           <th>Temps sans penalité</th>
+                           <th>Temps</th>
                             <th>Pénalité</th>
                           </th>
                           <th>temps d'arrivé
@@ -51,9 +54,11 @@
                         </thead>
                         <tbody id="tbody">
                             <tr th:each="resultat :${etape.resultatCoureurs}" >
-                              <td th:text="${resultat.resultat.coureur.nom}"></td>
+                                <td th:text="${resultat.rang}"></td>
                                 <td th:text="${resultat.resultat.coureur.nom}"></td>
+                                <td th:text="${resultat.resultat.coureur.genre}"></td>
                                 <td th:text="${resultat.resultat.coureur.dossard}"></td>
+                                <td th:text="${resultat.temps_sans_penale}"></td>
                                 <td th:text="${resultat.resultat.temps}"></td>
                                 <td th:text="${resultat.penalite}"></td>
                                 <td th:text="${resultat.temps_arrivePenal}"></td>

@@ -76,10 +76,15 @@ public class EtapesControleur {
     @GetMapping("/formAffect")
     public String formulaireAffect(Model model,@RequestParam String etape){
         Etapes etapes=service.getById((long)Integer.parseInt(etape)).get();
+        int nombre=etapes.getNombreEquipe();
         Equipe equipe=(Equipe)session.getAttribute("user");
+        List<Resultat> coureurAffect=resultatService.getByEtapeAndEquipe(etapes, equipe);
+        if(coureurAffect.size()>=nombre){
+            return Index.redirectLogin(session.getAttribute("user"), "user", "redirect:/coureur/etape?erreur=Nombre de coureur deja complet dans l'etape "+etapes.getNom());
+        }
         model.addAttribute("coureurs",equipe.getCoureurs());
         model.addAttribute("etape",etapes);
-        model.addAttribute("coureurAffect",resultatService.getByEtapeAndEquipe(etapes, equipe));
+        model.addAttribute("coureurAffect",coureurAffect);
         return Index.redirectLogin(session.getAttribute("user"), "user", "pages/client/FormJoueur");
     }
 
@@ -124,7 +129,7 @@ public class EtapesControleur {
     @GetMapping("/etapeAdmin")
     public String listeEtapeAdmin(Model model){
         Course cours=courseService.getById((long)2).get();
-        model.addAttribute("etapes", cours.getEtapes());
+        model.addAttribute("etapes", service.getAll());
         return Index.redirectLogin(session.getAttribute("admin"), "admin", "pages/admin/etapeListe");
     }
 

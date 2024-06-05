@@ -122,8 +122,6 @@ public class Index {
         try {
             CSVservice.csvToBaseEtape(csv1);
              CSVservice.csvDevisToBaseResultat(csv2);
-            // Function.saveFile(csv1, "uploads" + csv1.getOriginalFilename());
-            // Function.saveFile(csv1, "uploads" + csv2.getOriginalFilename());
             
             Map<String, String> successMessage = new HashMap<>();
             successMessage.put("message", "Importation reussi");
@@ -139,7 +137,7 @@ public class Index {
             response.getWriter().write(gson.toJson(errorResponse));
         }
     }
-
+ 
     @PostMapping("/import/csv/point")
     @Transactional
     public void importCSVPoint(@RequestParam("csv") MultipartFile csv,HttpServletResponse response) throws IOException {
@@ -193,7 +191,6 @@ public class Index {
                 "        EXECUTE format('ALTER SEQUENCE %I.%I RESTART WITH 2', r.sequence_schema, r.sequence_name);\n" +
                 "    END LOOP;\n" +
                 "END $$;";
-    
         jdbcTemplate.execute(query);
         jdbcTemplate.execute(deleteUser);
         jdbcTemplate.execute(resetSequences);
@@ -206,4 +203,9 @@ public class Index {
         jdbcTemplate.execute(query);
     }
 
+    @GetMapping("/equipe/deconnection")
+    public String deconnectionClient() {
+        httpSession.invalidate();
+        return "redirect:/";
+    }
 }

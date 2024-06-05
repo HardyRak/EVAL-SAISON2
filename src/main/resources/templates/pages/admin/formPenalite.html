@@ -1,0 +1,71 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajout unite</title>
+    <link rel="stylesheet" href="../plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../dist/css/adminlte.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary" style="margin-top: 15px;">
+                    <div class="card-header">
+                      <h3 class="card-title">Ajout penalité:</h3>
+                    </div>
+                    <form method="POST" action="../penalite/ajout">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="unite">Etape</label>
+                                <select name="id_etape" class="form-control">
+                                    <option th:each="etape : ${etapes}" th:text="${etape.nom}" th:value="${etape.id_etape}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="unite">Equipe:</label>
+                                <select name="id_equipe" class="form-control">
+                                    <option th:each="equipe : ${equipes}" th:text="${equipe.authentification}" th:value="${equipe.id_equipe}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="unite">Temps de pénalité:</label>
+                                <input value="00:00:00" type="time" step="1" name="temps" class="form-control">
+                            </div>
+                        </div>
+
+                      <div class="card-footer">
+                        <button type="submit" class="btn btn-danger">Validé</button>
+                      </div>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <div class="card-body" th:if="${param.erreur}">
+                        <div class="alert alert-danger alert-dismissible">
+                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                          <h6><i class="icon fas fa-ban"></i> Alert!</h6>
+                          <g th:text="${param.erreur}"></g>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="../plugins/jquery/jquery.min.js"></script>
+<script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+<script src="../dist/js/adminlte.min.js"></script>
+<script src="../dist/js/demo.js"></script>
+<script>
+$(function () {
+  bsCustomFileInput.init();
+});
+</script>
+</html>

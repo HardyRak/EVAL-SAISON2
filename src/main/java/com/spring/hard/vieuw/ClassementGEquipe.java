@@ -5,6 +5,8 @@ import com.spring.hard.models.Equipe;
 public class ClassementGEquipe {
     Equipe equipe;
     int point;
+    boolean ex;
+    
     public Equipe getEquipe() {
         return equipe;
     }
@@ -16,5 +18,11 @@ public class ClassementGEquipe {
     }
     public void setPoint(int point) {
         this.point = point;
+    }
+    public boolean isEx() {
+        return ex;
+    }
+    public void setEx(boolean ex) {
+        this.ex = ex;
     }
 }

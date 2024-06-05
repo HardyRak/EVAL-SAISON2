@@ -2,14 +2,17 @@ package com.spring.hard.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.spring.hard.function.Function;
 import com.spring.hard.models.Coureur;
 import com.spring.hard.models.Course;
 import com.spring.hard.models.Equipe;
 import com.spring.hard.models.Etapes;
+import com.spring.hard.models.Penalite;
 import com.spring.hard.models.Resultat;
 import com.spring.hard.repository.ResultatRepository;
 import com.spring.hard.vieuw.ClassementEquipe;
 import com.spring.hard.vieuw.ClassementGEquipe;
+import com.spring.hard.vieuw.ResultatCoureur;
 
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -17,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -32,6 +36,9 @@ public class ResultatService {
     private EquipeService equipeService;
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private PenaliteService penaliteService;
+
     public Resultat saveOrUpdate(Resultat entity) {
         return repository.save(entity);
     }
@@ -112,7 +119,7 @@ public class ResultatService {
         for (int i = 0; i < etapes.size(); i++) {
             etapes.get(i).setClassementGEquipes(this.getClassementParCategorie((int) etapes.get(i).getId_etape(), id_categorie));
         }
-    
+
         List<Equipe> equipes = equipeService.getAll();
         List<ClassementGEquipe> result = new ArrayList<>();
         for (int i = 0; i < equipes.size(); i++) {
@@ -131,8 +138,18 @@ public class ResultatService {
             result.add(classe);
         }
         
+        for (int i = 0; i < result.size(); i++) {
+            for (int j = 0; j < result.size(); j++) {
+                if(i!=j){
+                    if(result.get(i).getPoint()==result.get(j).getPoint() && result.get(i).getPoint()!=0){
+                        result.get(i).setEx(true);
+                    }
+                }
+            }
+        }
+
         result.sort(Comparator.comparingInt(ClassementGEquipe::getPoint).reversed());
-    
+
         return result;
     }
 
@@ -156,5 +173,49 @@ public class ResultatService {
         return repository.findByEtapeAndEquipe(etapes, equipe,Sort.by("temps").descending());
     }
 
+    public List<ClassementGEquipe> getVainqueur(){
+        List<ClassementGEquipe> classementGenerale=this.getResultatDesEquipe();
+        List<ClassementGEquipe> vaincre= new ArrayList<>();
+        ClassementGEquipe maxpt=classementGenerale.get(0);
+        vaincre.add(maxpt);
+        for (int i = 0; i < classementGenerale.size(); i++) {
+            if(maxpt.getPoint()==classementGenerale.get(i).getPoint() && classementGenerale.get(i).getEquipe().getId_equipe()!=maxpt.getEquipe().getId_equipe()){
+                vaincre.add(classementGenerale.get(i));
+            }
+        }
+        return vaincre;
+    }
+
+    public List<ResultatCoureur> getResultatCoureur(Etapes etapes){
+        List<Resultat> resultats=etapes.getResultats();
+        List<ResultatCoureur> resultCoureurs=new ArrayList<>();
+
+        for (int i = 0; i < resultats.size(); i++) {
+            ResultatCoureur resultatCoureur=new ResultatCoureur();
+            resultatCoureur.setResultat(resultats.get(i));
+            List<Penalite> penalites=penaliteService.getPenaliteEquipeEtape(resultats.get(i).getEquipe(),etapes);
+            System.out.println("================================="+penalites.size());
+            LocalTime tempsPenal=LocalTime.parse("00:00:00");
+            for (int j = 0; j < penalites.size(); j++) {
+                tempsPenal=Function.addLocalTime(tempsPenal, penalites.get(j).getTemps());
+            }
+            resultatCoureur.setPenalite(tempsPenal);
+            ZonedDateTime dateTonga=resultats.get(i).getTempsArrive();
+            LocalTime tempsSansPenal=resultats.get(i).getTemps();
+            for (int j = 0; j < penalites.size(); j++) {
+                dateTonga=Function.subtractLocalTimeAndZone(dateTonga, penalites.get(j).getTemps());
+                tempsSansPenal=Function.subtractLocalTime(tempsSansPenal, penalites.get(j).getTemps());
+            }
+            resultatCoureur.setTemps_sans_penale(tempsSansPenal);
+            resultatCoureur.setPoint(resultats.get(i).getPoint());
+            resultatCoureur.setTemps_arrivePenal(dateTonga);
+            resultCoureurs.add(resultatCoureur);
+        }
+        resultCoureurs.sort(Comparator.comparingInt(ResultatCoureur::getPoint).reversed());
+        for (int i = 0; i < resultCoureurs.size(); i++) {
+            resultCoureurs.get(i).setRang(i+1);
+        }
+        return resultCoureurs;
+    }
 
 }
