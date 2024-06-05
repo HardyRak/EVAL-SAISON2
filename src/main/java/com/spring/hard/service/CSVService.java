@@ -1,6 +1,5 @@
 package com.spring.hard.service;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -19,7 +18,6 @@ import com.spring.hard.csvObject.ResultatCsv;
 // import com.spring.hard.csvObject.MaisonTrav;
 import com.spring.hard.errorControle.CsvException;
 import com.spring.hard.function.Function;
-import com.spring.hard.models.Etapes;
 
 @Service
 public class CSVService {
@@ -123,6 +121,9 @@ public class CSVService {
         "join coureur on "+tableName+".numero_dossard=coureur.dossard "+
         "join etapes on "+tableName+".etape_rang=etapes.rang";
         jdbcTemplate.execute(demandeInsert);
+
+        jdbcTemplate.execute("drop table "+tableName);
+
     }
 
 

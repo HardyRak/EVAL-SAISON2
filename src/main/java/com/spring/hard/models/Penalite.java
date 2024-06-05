@@ -1,11 +1,11 @@
 package com.spring.hard.models;
 
 import java.sql.Date;
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 
 import com.spring.hard.vieuw.ClassementGEquipe;
-import com.spring.hard.vieuw.ResultatCoureur;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,28 +21,19 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "etapes")
+@Table(name = "penalite")
 @Getter
 @Setter
-public class Etapes {
+public class Penalite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id_etape;
-    String nom;
-    double longueur;
-    int nombreEquipe;
-    ZonedDateTime tempsDepart;
-    int rang;
+    long id_penalite;
     @ManyToOne
-    @JoinColumn(name = "id_course", nullable = false)
-    Course course;
-    @OneToMany(mappedBy = "etape",fetch = FetchType.EAGER)
-    List<Resultat> resultats;
-    
-    @Transient
-    List<ClassementGEquipe> classementGEquipes;
-
-    @Transient
-    List<ResultatCoureur> resultatCoureurs;
-
+    @JoinColumn(name = "id_equipe", nullable = false)
+    Equipe equipe;
+    @ManyToOne
+    @JoinColumn(name = "id_etape", nullable = false)
+    Etapes etape;
+    LocalTime temps;
+    int etat;
 }

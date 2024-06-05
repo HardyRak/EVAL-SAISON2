@@ -1,0 +1,70 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="plugins/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="dist/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4" style="margin-top: 15px;">
+                <div class="btn-group" style="margin-bottom: 15px;">
+                      <button type="button" class="btn btn-info" onclick="topdf()">imprimé <b id="nombre" th:text="${gagnants.size()}"></b> certificats </button>
+                  </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12" th:each="gagnant, i : ${gagnants}" >
+        <div class="outer-border" th:id="'certifi' + ${i.count}">
+            <div class="inner-dotted-border">
+                <span class="certification">RUNNING CHAMPION</span>
+                <br><br>
+                <span class="certify"><i>Certificat pour le vainqueur</i></span>
+                <br><br>
+                <span class="name"><b th:text="${'Equipe: ' + gagnant.equipe.authentification}"></b></span><br/><br/>
+                <span class="certify"><i>Félicitation à votre équipe</i></span> <br/><br/>
+                <span class="fs-30">Vainqueur</span> <br/><br/>
+                <span class="fs-20">Avec un score de <b  th:text="${gagnant.point + ' points'}"></b></span> <br/><br/><br/><br/>
+                <span class="certify"><i>Date du</i></span><br>
+                <span class="fs-30" th:text="${ date }" ></span><br>
+                <span class="fs-20">Signature:___________________</span> <br/><br/>
+            </div>
+        </div>
+    </div>
+<script type="text/javascript" src="plugins/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="plugins/pdf/html2pdf.bundle.min.js"></script>
+
+<script>
+function topdfall(iddata) {
+  const element = document.getElementById(iddata);
+  element.style.display = '';
+  const options = {
+    filename: iddata + '.pdf',
+    margin: 0,
+    image: { type: 'png', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: {
+      unit: 'in',
+      format: 'a3',
+      orientation: 'portrait'
+    }
+  };
+  html2pdf().set(options).from(element).save();
+}
+
+function topdf() {
+  var nb = document.getElementById('nombre').textContent;
+  for (let i = 1; i <= nb; i++) {
+    console.log('certifi' + i)
+    topdfall('certifi' + i);
+  }
+}
+
+
+</script>
+</body>
+</html>

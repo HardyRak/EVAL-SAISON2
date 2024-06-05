@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.spring.hard.function.Function;
 import com.spring.hard.models.Categorie;
 import com.spring.hard.models.Course;
 import com.spring.hard.models.Equipe;
@@ -16,6 +17,7 @@ import com.spring.hard.models.Resultat;
 import com.spring.hard.service.CategorieService;
 import com.spring.hard.service.CourseService;
 import com.spring.hard.service.EquipeService;
+import com.spring.hard.service.EtapesService;
 import com.spring.hard.service.ResultatService;
 import com.spring.hard.vieuw.ClassementGEquipe;
 
@@ -28,6 +30,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -44,6 +47,8 @@ public class ResultatControleur {
     private HttpSession httpSession;
     @Autowired
     private CategorieService categorieService;
+    @Autowired
+    private EtapesService etapesService;
     @CrossOrigin(origins = "*")
     @GetMapping("/api/resultat")
     public ResponseEntity<List<Resultat>> getAllResultatApi() {
@@ -64,11 +69,18 @@ public class ResultatControleur {
     }
 
     @GetMapping("/classement/etape")
-    public String classement(Model model){
-        Course course=courseService.getById((long)2).get();
-        List<Etapes> etapes=course.getEtapes();
+    public String classement(Model model,@RequestParam int id_etape){
+        Etapes etape=etapesService.getById((long)id_etape).get();
+        etape.setResultatCoureurs(service.getResultatCoureur(etape));
+        model.addAttribute("etape",etape);
+        return "pages/admin/classementParEtape";
+    }
+
+    @GetMapping("/classement/etape/all")
+    public String classementAll(Model model){
+        List<Etapes> etapes=etapesService.getAll();
         for (int i = 0; i < etapes.size(); i++) {
-            etapes.get(i).setResultats(service.getByEtape(etapes.get(i)));
+            etapes.get(i).setResultatCoureurs(service.getResultatCoureur(etapes.get(i)));
         }
         model.addAttribute("etapes",etapes);
         return "pages/all/classementEtape";
@@ -93,8 +105,25 @@ public class ResultatControleur {
     @GetMapping("/classement/categorie/generale")
     public String classementParCategorieGenerale(Model model,@RequestParam String id_categorie){
         List<ClassementGEquipe> classementGEquipes=service.getClassementGeneralCategorie(Integer.parseInt(id_categorie));
+        Categorie categorie=categorieService.getById( Long.parseLong(id_categorie)).get();
+        model.addAttribute("categorie",categorie);
         model.addAttribute("classement",classementGEquipes);
         return "pages/all/classementCategorieGenerale";
+    }
+
+    @GetMapping("/API/classement/categorie/generale")
+    public ResponseEntity<List<ClassementGEquipe>> getAllResultatGeneralCategorie(@RequestParam String id_categorie) {
+        List<ClassementGEquipe> classementGEquipes=service.getClassementGeneralCategorie(Integer.parseInt(id_categorie));
+        List<ClassementGEquipe> retour=new ArrayList<>();
+        for (int i = 0; i < classementGEquipes.size(); i++) {
+            ClassementGEquipe classement=new ClassementGEquipe();
+            Equipe equipe=new Equipe();
+            equipe.setAuthentification(classementGEquipes.get(i).getEquipe().getAuthentification());
+            classement.setEquipe(equipe);
+            classement.setPoint(classementGEquipes.get(i).getPoint());
+            retour.add(classement);
+        }
+        return new ResponseEntity<>(retour, HttpStatus.OK);
     }
 
     @GetMapping("/classement/admin/equipe")
@@ -108,6 +137,11 @@ public class ResultatControleur {
     public String resultat(Model model,@RequestParam String id_equipe){
         Equipe equipe=equipeService.getById((long)Integer.parseInt(id_equipe)).get();
         List<Resultat> resultats=service.getClassementEquipe((int)equipe.getId_equipe());
+        int total=0;
+        for(int i=0;i<resultats.size();i++){
+            total+=resultats.get(i).getPoint();
+        }
+        model.addAttribute("total",total);
         model.addAttribute("resultats",resultats);
         return "pages/all/resultEquipe";
     }
@@ -144,5 +178,32 @@ public class ResultatControleur {
         model.addAttribute("categories",categories);
         model.addAttribute("classement",service.getResultatDesEquipe());
         return "/pages/all/classementDesEquipe";
+    }
+
+    @GetMapping("/API/classement/equipe/generale")
+    public ResponseEntity<List<ClassementGEquipe>> getAllResultatGeneral() {
+        List<ClassementGEquipe> retourC=service.getResultatDesEquipe();
+        List<ClassementGEquipe> retour=new ArrayList<>();
+        for (int i = 0; i < retourC.size(); i++) {
+            ClassementGEquipe classement=new ClassementGEquipe();
+            Equipe equipe=new Equipe();
+            equipe.setAuthentification(retourC.get(i).getEquipe().getAuthentification());
+            classement.setEquipe(equipe);
+            classement.setPoint(retourC.get(i).getPoint());
+            retour.add(classement);
+        }
+        return new ResponseEntity<>(retour, HttpStatus.OK);
+    }
+
+    @GetMapping("/certification")
+    public String certification(Model model){
+        List<ClassementGEquipe> retourC=service.getVainqueur();
+        ClassementGEquipe vaincre=retourC.get(0);
+        if(vaincre.getPoint()==0){
+            return Index.redirectLogin(httpSession.getAttribute("admin"), "admin", "redirect:/classement/equipe/generale");
+        }
+        model.addAttribute("date",Function.getCurrenDate());
+        model.addAttribute("gagnants",retourC);
+        return Index.redirectLogin(httpSession.getAttribute("admin"), "admin", "pages/admin/certificationPage");
     }
 }

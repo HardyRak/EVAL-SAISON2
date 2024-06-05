@@ -22,15 +22,10 @@
     </div>
     <div class="card-body">
         <div class="col-md-8 offset-md-2">
-          <form id="searchform">
-            <div class="input-group">
-              <input type="search" id="search" class="form-control form-control-lg" placeholder="Votre recherche ici">
-            </div>
-          </form>
         </div>
 
         <div class="btn-group" style="margin-bottom: 15px;">
-            <button type="button" class="btn btn-info" onclick="exportAPItoPDF()">PDF</button>
+            <button type="button" class="btn btn-info" onclick="topdfall('data')">PDF</button>
         </div>
         
         <table id="data" class="table table-bordered">
@@ -50,8 +45,13 @@
                     <td th:text="${resultat.coureur.nom}"></td>
                     <td th:text="${resultat.coureur.dossard}"></td>
                     <td th:text="${resultat.temps}"></td>
-                    <td th:text="${resultat.tempsArrive}"></td>
                     <td th:text="${resultat.point}"></td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td>Total:</td>
+                  <td th:text="${total}" style="background-color: chartreuse;"></td>
                 </tr>
             </tbody>
         </table>  
@@ -273,6 +273,22 @@ function exportAPItoPDF() {
       };
       html2pdf().set(options).from(element).save();
   }
+
+  function topdfall(iddata) {
+  const element = document.getElementById(iddata);
+  element.style.display = '';
+  const options = {
+    filename: iddata + '.pdf',
+    margin: 0,
+    image: { type: 'png', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: {
+      unit: 'in',
+    }
+  };
+  html2pdf().set(options).from(element).save();
+}
+
   </script>
 </body>
 </html>

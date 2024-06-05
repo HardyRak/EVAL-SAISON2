@@ -36,7 +36,8 @@ public class EtapesService {
     }
 
     public List<Etapes> getAll() {
-        return repository.findAll();
+        Sort sort=Sort.by(Sort.Direction.ASC,"rang");
+        return repository.findAll(sort);
     }
 
     public void deleteById(Long id) {
