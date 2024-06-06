@@ -365,3 +365,30 @@ BEGIN
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
+
+/*
+    ranking example ex eaquo
+        A - 1
+        C - 2
+        B - 2 -> ex eaquo
+        D - 3
+        E - 3 -> ex eaquo
+
+        GROUP BY rank HAVING COUNT( * ) > 1 LEFT JOINT ranking
+        2 - 2 => the pts 2 have count 2
+        3 - 2 => the pts 3 have count 2
+
+
+    delete table
+        UPDATE : create colonne for delete : 1/0 ou true / false
+            -block the transactional action
+        INSERT : create a new table(etat_etape) for the delete line(id_etape)
+        Search the all view and select having the etape table
+            -add condition suppress
+        Don't join directly on the table but do join on the vue : create v_etape (select * from etapes)
+        if she have to see the all columns in etapes
+            create v_etapes_all (have not any condition)
+            or create v_etapes_supprimes (UNION ALL v_etapes)
+
+*/
